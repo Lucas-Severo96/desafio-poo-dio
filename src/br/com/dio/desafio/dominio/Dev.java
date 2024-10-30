@@ -6,6 +6,48 @@ public class Dev {
     private String nome;
     private Set<Conteudo> conteudosInscritos = new LinkedHashSet<>();
     private Set<Conteudo> conteudosConcluidos = new LinkedHashSet<>();
+    //atributos referentes a geracao randomica de CPF
+    private static Set<String> cpfsGerados = new HashSet<>();
+    private static Random random = new Random();
+
+    public String gerarCPF() {
+        String cpf;
+
+        do {
+            cpf = gerarNumerosBase();
+            cpf += calcularDigitoVerificador(cpf);
+        } while (cpfsGerados.contains(cpf));
+
+        cpfsGerados.add(cpf);
+        return formatarCPF(cpf);
+    }
+
+    public String gerarNumerosBase() {
+        StringBuilder base = new StringBuilder();
+        for (int i = 0; i < 9; i++) {
+            base.append(random.nextInt(10));
+        }
+        return base.toString();
+    }
+
+    public String calcularDigitoVerificador(String base) {
+        int primeiroDigito = calcularDigito(base, 10);
+        int segundoDigito = calcularDigito(base + primeiroDigito, 11);
+        return "" + primeiroDigito + segundoDigito;
+    }
+
+    public int calcularDigito(String str, int pesoInicial) {
+        int soma = 0;
+        for (int i = 0; i < str.length(); i++) {
+            soma += (str.charAt(i) - '0') * (pesoInicial - i);
+        }
+        int resto = soma % 11;
+        return (resto < 2) ? 0 : 11 - resto;
+    }
+
+    public String formatarCPF(String cpf) {
+        return cpf.substring(0, 3) + "." + cpf.substring(3, 6) + "." + cpf.substring(6, 9) + "-" + cpf.substring(9, 11);
+    }
 
     public void inscreverBootcamp(Bootcamp bootcamp){
         this.conteudosInscritos.addAll(bootcamp.getConteudos());
@@ -74,4 +116,5 @@ public class Dev {
     public int hashCode() {
         return Objects.hash(nome, conteudosInscritos, conteudosConcluidos);
     }
+
 }
